@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+require "colorize"
+
+file    = ARGV[0]
+command = "ruby -I test #{file}"
+test_result = `#{command}`
+
+def paint_y(f, i, count)
+  puts f[count + i].chomp.yellow
+rescue  
+end
+
+def paint_g(f, i, count)
+  puts f[count + i].chomp.green
+rescue  
+end
+
+stacks = test_result.split("\n").reverse.map do |line|
+  /[^\s]+\.(rb|erb):\d+/.match(line).to_s 
+end.compact.select do |line|
+  line.strip != ""
+end.each do |line|
+  lsp = line.chomp.split(":")
+  file  = lsp[0]
+  count = lsp[1].to_i - 1 
+  f = File.open(file, "r").each_line.to_a
+  puts "[#{file} #{count}]"
+  paint_y(f, count, -2)
+  paint_y(f, count, -1)
+  paint_g(f, count, 0)
+  paint_y(f, count, 1)
+  paint_y(f, count, 2)
+  puts
+end
